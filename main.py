@@ -3,11 +3,8 @@ import questionary
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
-from reportes import calcular_tiempo_abierto, mostrar_resumen, exportar_a_csv
 
 from archivo import cargar_tickets, guardar_tickets
-
-
 from tickets import (
     crear_ticket,
     buscar_ticket_por_id,
@@ -17,7 +14,7 @@ from tickets import (
     filtrar_por_estado,
     filtrar_por_prioridad
 )
-import tickets
+from reportes import calcular_tiempo_abierto, mostrar_resumen, exportar_a_csv
 
 logging.basicConfig(
     filename="helpdesk.log",
@@ -27,32 +24,28 @@ logging.basicConfig(
     encoding="utf-8"
 )
 
-from reportes import calcular_tiempo_abierto, mostrar_resumen
-
 console = Console()
 
-def pedir_id_valido(mensaje: str = "Ingresá el ID del ticket:") -> int | None:
-    """Pide un ID numérico y maneja errores de conversión con try-except."""
-    entrada = questionary.text(mensaje).ask()
+def pedir_id_valido():
+    entrada = questionary.text("Ingresá el ID del ticket:").ask()
     if entrada is None:
         return None
     try:
         ticket_id = int(entrada)
         if ticket_id <= 0:
-            console.print("[red]El ID debe ser un número positivo.[/red]")
-            return None
+            raise ValueError
         return ticket_id
     except ValueError:
-        console.print("[red]Error: Tenés que ingresar un número entero válido.[/red]")
+        console.print("[bold red]El ID tiene que ser un número entero positivo.[/bold red]")
+        logging.warning(f"Se ingresó un ID inválido: '{entrada}'")
         return None
 
-def mostrar_tabla_tickets(tickets: list[dict]):
-    """Renderiza todos los tickets en una tabla formateada con Rich."""
+def mostrar_tabla_tickets(tickets):
     if not tickets:
-        console.print(Panel("No hay tickets registrados en el sistema.", style="yellow"))
+        console.print(Panel("No hay tickets para mostrar.", style="yellow"))
         return
 
-    tabla = Table(title="📋 Listado de Tickets - Mesa de Ayuda", show_lines=True)
+    tabla = Table(title="Mesa de Ayuda - Gestión de Tickets", show_lines=True)
     tabla.add_column("ID", justify="center", style="cyan", no_wrap=True)
     tabla.add_column("Título", style="bold white")
     tabla.add_column("Prioridad", justify="center")
@@ -77,21 +70,9 @@ def mostrar_tabla_tickets(tickets: list[dict]):
 
     console.print(tabla)
 
-def mostrar_detalle_ticket(ticket: dict):
-    """Muestra toda la información de un ticket específico."""
-    detalle = (
-        f"[bold cyan]ID:[/bold cyan] {ticket['id']}\n"
-        f"[bold cyan]Título:[/bold cyan] {ticket['titulo']}\n"
-        f"[bold cyan]Descripción:[/bold cyan] {ticket['descripcion']}\n"
-        f"[bold cyan]Prioridad:[/bold cyan] {ticket['prioridad'].upper()}\n"
-        f"[bold cyan]Estado:[/bold cyan] {ticket['estado']}\n"
-        f"[bold cyan]Fecha de creación:[/bold cyan] {ticket['fecha_creacion']}"
-    )
-    console.print(Panel(detalle, title=f"Detalle del Ticket #{ticket['id']}", expand=False))
-
 def main():
+    logging.info("Inicio de sesión en el sistema Helpdesk")
     tickets = cargar_tickets()
-    console.print(Panel.fit("[bold blue]Sistema de Mesa de Ayuda (Helpdesk)[/bold blue]"))
 
     opciones_menu = [
         "1. Crear ticket",
@@ -106,88 +87,113 @@ def main():
     ]
 
     while True:
-        console.print()
-        opcion = questionary.select("Seleccioná una opción:", choices=opciones_menu).ask()
+        console.print("\n[bold cyan]=== SISTEMA HELPDESK ===[/bold cyan]")
+        opcion = questionary.select(
+            "¿Qué querés hacer?",
+            choices=opciones_menu
+        ).ask()
 
         if opcion is None or opcion.startswith("9."):
-            if guardar_tickets(tickets):
-                console.print("[bold green]Datos guardados correctamente. ¡Hasta luego![/bold green]")
-            else:
-                console.print("[bold red]Hubo un problema al guardar los datos.[/bold red]")
+            logging.info("Cierre del sistema Helpdesk")
+            console.print("[bold green]Cerrando sistema. ¡Nos vemos![/bold green]")
             break
 
         elif opcion.startswith("1."):
-            titulo = questionary.text(
-                "Título del problema:",
-                validate=lambda text: True if len(text.strip()) > 0 else "El título no puede estar vacío."
-            ).ask()
-            if titulo is None:
+            titulo = questionary.text("Título del problema:").ask()
+            if not titulo or not titulo.strip():
+                console.print("[yellow]El título no puede quedar vacío.[/yellow]")
                 continue
 
-            descripcion = questionary.text("Descripción detallada:").ask() or ""
+            descripcion = questionary.text("Descripción breve:").ask()
+            if descripcion is None:
+                continue
+
             prioridad = questionary.select(
-                "Prioridad:",
+                "Prioridad del ticket:",
                 choices=["alta", "media", "baja"]
             ).ask()
-            if prioridad is None:
+            if not prioridad:
                 continue
 
-            nuevo = crear_ticket(tickets, titulo, descripcion, prioridad)
+            nuevo = crear_ticket(tickets, titulo.strip(), descripcion.strip(), prioridad)
             guardar_tickets(tickets)
-            console.print(f"[green]✔ Ticket #{nuevo['id']} creado con éxito.[/green]")
+            console.print(f"[bold green]Ticket #{nuevo['id']} creado y guardado.[/bold green]")
 
         elif opcion.startswith("2."):
             mostrar_tabla_tickets(tickets)
 
         elif opcion.startswith("3."):
             ticket_id = pedir_id_valido()
-            if ticket_id is not None:
-                ticket = buscar_ticket_por_id(tickets, ticket_id)
-                if ticket:
-                    mostrar_detalle_ticket(ticket)
-                else:
-                    console.print(f"[yellow]No se encontró ningún ticket con ID #{ticket_id}.[/yellow]")
+            if ticket_id is None:
+                continue
+
+            ticket = buscar_ticket_por_id(tickets, ticket_id)
+            if ticket:
+                detalle = (
+                    f"[bold]ID:[/bold] {ticket['id']}\n"
+                    f"[bold]Título:[/bold] {ticket['titulo']}\n"
+                    f"[bold]Descripción:[/bold] {ticket['descripcion']}\n"
+                    f"[bold]Prioridad:[/bold] {ticket['prioridad']}\n"
+                    f"[bold]Estado:[/bold] {ticket['estado']}\n"
+                    f"[bold]Creado:[/bold] {ticket['fecha_creacion']}\n"
+                    f"[bold]Tiempo abierto:[/bold] {calcular_tiempo_abierto(ticket)}"
+                )
+                console.print(Panel(detalle, title=f"Detalle del Ticket #{ticket_id}", border_style="cyan"))
+            else:
+                console.print(f"[yellow]No existe ningún ticket con el ID {ticket_id}.[/yellow]")
 
         elif opcion.startswith("4."):
-            ticket_id = pedir_id_valido("Ingresá el ID del ticket para avanzar su estado:")
-            if ticket_id is not None:
-                ticket = buscar_ticket_por_id(tickets, ticket_id)
-                if ticket:
-                    exito, msg = cambiar_estado_ticket(ticket)
-                    if exito:
-                        guardar_tickets(tickets)
-                        console.print(f"[green]✔ {msg}[/green]")
-                    else:
-                        console.print(f"[yellow]{msg}[/yellow]")
-                else:
-                    console.print(f"[yellow]No se encontró ningún ticket con ID #{ticket_id}.[/yellow]")
+            ticket_id = pedir_id_valido()
+            if ticket_id is None:
+                continue
 
-        elif opcion.startswith("5."):
-            ticket_id = pedir_id_valido("Ingresá el ID del ticket a eliminar:")
-            if ticket_id is not None:
-                ticket = buscar_ticket_por_id(tickets, ticket_id)
-                if ticket:
-                    mostrar_detalle_ticket(ticket)
-                    confirmar = questionary.confirm(
-                        f"¿Estás seguro de que querés eliminar el ticket #{ticket_id}?",
-                        default=False
-                    ).ask()
-                    if confirmar:
-                        eliminar_ticket(tickets, ticket_id)
-                        guardar_tickets(tickets)
-                        console.print(f"[green]✔ Ticket #{ticket_id} eliminado.[/green]")
-                    else:
-                        console.print("[cyan]Operación cancelada.[/cyan]")
-                else:
-                    console.print(f"[yellow]No se encontró ningún ticket con ID #{ticket_id}.[/yellow]")
+            ticket = buscar_ticket_por_id(tickets, ticket_id)
+            if not ticket:
+                console.print(f"[yellow]No existe ningún ticket con el ID {ticket_id}.[/yellow]")
+                continue
 
-        elif opcion.startswith("6."):            
-            criterio = questionary.select(
-                "¿Cómo querés filtrar?",
-                choices=["Por estado", "Por prioridad", "Cancelar"]
+            nuevo_estado = questionary.select(
+                f"Estado actual: '{ticket['estado']}'. Elegí el nuevo estado:",
+                choices=["abierto", "en_curso", "resuelto"]
             ).ask()
 
-            if criterio == "Por estado":
+            if nuevo_estado and cambiar_estado_ticket(tickets, ticket_id, nuevo_estado):
+                guardar_tickets(tickets)
+                console.print(f"[bold green]Se actualizó el ticket #{ticket_id} a '{nuevo_estado}'.[/bold green]")
+
+        elif opcion.startswith("5."):
+            ticket_id = pedir_id_valido()
+            if ticket_id is None:
+                continue
+
+            ticket = buscar_ticket_por_id(tickets, ticket_id)
+            if not ticket:
+                console.print(f"[yellow]No existe ningún ticket con el ID {ticket_id}.[/yellow]")
+                continue
+
+            if ticket["estado"] != "resuelto":
+                console.print("[yellow]No se puede borrar un ticket pendiente. Primero pasalo a 'resuelto'.[/yellow]")
+                continue
+
+            confirmar = questionary.confirm(
+                f"¿Seguro que querés borrar el ticket #{ticket_id} ('{ticket['titulo']}')?",
+                default=False
+            ).ask()
+
+            if confirmar:
+                eliminar_ticket(tickets, ticket_id)
+                guardar_tickets(tickets)
+                console.print(f"[green]Ticket #{ticket_id} eliminado.[/green]")
+            else:
+                console.print("[cyan]Listo, se canceló.[/cyan]")
+
+        elif opcion.startswith("6."):
+            criterio = questionary.select(
+                "Filtrar por:",
+                choices=["Estado", "Prioridad", "Volver"]
+            ).ask()
+
+            if criterio == "Estado":
                 estado = questionary.select(
                     "Elegí el estado:",
                     choices=["abierto", "en_curso", "resuelto"]
@@ -195,7 +201,7 @@ def main():
                 if estado:
                     mostrar_tabla_tickets(filtrar_por_estado(tickets, estado))
 
-            elif criterio == "Por prioridad":
+            elif criterio == "Prioridad":
                 prioridad = questionary.select(
                     "Elegí la prioridad:",
                     choices=["alta", "media", "baja"]
@@ -208,11 +214,11 @@ def main():
 
         elif opcion.startswith("8."):
             if not tickets:
-                console.print("[yellow]No hay tickets para exportar.[/yellow]")
+                console.print("[yellow]No hay tickets cargados para exportar.[/yellow]")
             elif exportar_a_csv(tickets):
-                console.print("[bold green]✔ Reporte exportado con éxito a 'reporte_tickets.csv'.[/bold green]")
+                console.print("[bold green]Listo, se generó 'reporte_tickets.csv'.[/bold green]")
             else:
-                console.print("[bold red]Error al generar el archivo CSV.[/bold red]")
+                console.print("[bold red]Hubo un problema al generar el CSV.[/bold red]")
 
 if __name__ == "__main__":
     main()

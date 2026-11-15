@@ -5,8 +5,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 
-def calcular_tiempo_abierto(ticket: dict) -> str:
-    """Calcula hace cuántas horas se creó un ticket si no está resuelto."""
+def calcular_tiempo_abierto(ticket):
     if ticket["estado"] == "resuelto":
         return "Resuelto"
     
@@ -21,8 +20,7 @@ def calcular_tiempo_abierto(ticket: dict) -> str:
     except ValueError:
         return "N/D"
 
-def generar_estadisticas(tickets: list[dict]) -> dict:
-    """Cuenta la cantidad de tickets por estado y por prioridad."""
+def generar_estadisticas(tickets):
     por_estado = {"abierto": 0, "en_curso": 0, "resuelto": 0}
     por_prioridad = {"alta": 0, "media": 0, "baja": 0}
 
@@ -40,32 +38,31 @@ def generar_estadisticas(tickets: list[dict]) -> dict:
         "por_prioridad": por_prioridad
     }
 
-def mostrar_resumen(tickets: list[dict], console: Console):
-    """Muestra en consola el resumen estadístico con tablas de Rich."""
+def mostrar_resumen(tickets, console):
     if not tickets:
-        console.print(Panel("No hay tickets para generar estadísticas.", style="yellow"))
+        console.print(Panel("No hay tickets cargados para armar el resumen.", style="yellow"))
         return
 
     stats = generar_estadisticas(tickets)
 
-    tabla_estados = Table(title="📊 Tickets por Estado", show_header=True)
+    tabla_estados = Table(title="Tickets por Estado", show_header=True)
     tabla_estados.add_column("Estado", style="cyan")
     tabla_estados.add_column("Cantidad", justify="center", style="bold white")
     for estado, cant in stats["por_estado"].items():
         tabla_estados.add_row(estado, str(cant))
 
-    tabla_prio = Table(title="🔥 Tickets por Prioridad", show_header=True)
+    tabla_prio = Table(title="Tickets por Prioridad", show_header=True)
     tabla_prio.add_column("Prioridad", style="magenta")
     tabla_prio.add_column("Cantidad", justify="center", style="bold white")
     for prio, cant in stats["por_prioridad"].items():
         tabla_prio.add_row(prio.upper(), str(cant))
 
-    console.print(Panel.fit(f"[bold]Total de tickets registrados:[/bold] {stats['total']}", style="blue"))
+    console.print(Panel.fit(f"[bold]Total de tickets en sistema:[/bold] {stats['total']}", style="blue"))
     console.print(tabla_estados)
     console.print(tabla_prio)
 
-def exportar_a_csv(tickets: list[dict], nombre_archivo: str = "reporte_tickets.csv") -> bool:
-    """Exporta todos los tickets a un archivo CSV compatible con Excel."""
+def exportar_a_csv(tickets, nombre_archivo="reporte_tickets.csv"):
+    """Exporta los tickets actuales a un CSV separado por punto y coma para Excel."""
     if not tickets:
         return False
 
@@ -76,7 +73,7 @@ def exportar_a_csv(tickets: list[dict], nombre_archivo: str = "reporte_tickets.c
             escritor = csv.DictWriter(f, fieldnames=campos, delimiter=";")
             escritor.writeheader()
             for t in tickets:
-                fila = {
+                datos_fila = {
                     "id": t["id"],
                     "titulo": t["titulo"],
                     "descripcion": t["descripcion"],
@@ -85,9 +82,9 @@ def exportar_a_csv(tickets: list[dict], nombre_archivo: str = "reporte_tickets.c
                     "fecha_creacion": t["fecha_creacion"],
                     "tiempo_abierto": calcular_tiempo_abierto(t)
                 }
-                escritor.writerow(fila)
-        logging.info(f"Reporte exportado correctamente a {nombre_archivo}")
+                escritor.writerow(datos_fila)
+        logging.info(f"Reporte CSV generado: {nombre_archivo}")
         return True
     except IOError as e:
-        logging.error(f"Error al exportar CSV {nombre_archivo}: {e}")
+        logging.error(f"No se pudo generar el CSV {nombre_archivo}: {e}")
         return False
