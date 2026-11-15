@@ -31,6 +31,8 @@ logging.basicConfig(
     encoding="utf-8"
 )
 
+from reportes import calcular_tiempo_abierto, mostrar_resumen
+
 console = Console()
 
 def pedir_id_valido(mensaje: str = "Ingresá el ID del ticket:") -> int | None:
@@ -60,6 +62,7 @@ def mostrar_tabla_tickets(tickets: list[dict]):
     tabla.add_column("Prioridad", justify="center")
     tabla.add_column("Estado", justify="center")
     tabla.add_column("Fecha Creación", justify="center", style="dim")
+    tabla.add_column("Tiempo Abierto", justify="center", style="magenta")
 
     colores_prioridad = {"alta": "red", "media": "yellow", "baja": "green"}
     tickets_ordenados = ordenar_por_prioridad(tickets)
@@ -72,7 +75,8 @@ def mostrar_tabla_tickets(tickets: list[dict]):
             t["titulo"],
             prioridad_fmt,
             t["estado"],
-            t["fecha_creacion"]
+            t["fecha_creacion"],
+            calcular_tiempo_abierto(t)
         )
 
     console.print(tabla)
@@ -100,14 +104,15 @@ def main():
         "4. Cambiar estado",
         "5. Eliminar ticket",
         "6. Filtrar tickets",
-        "7. Salir"
+        "7. Ver resumen estadístico",
+        "8. Salir"
     ]
 
     while True:
         console.print()
         opcion = questionary.select("Seleccioná una opción:", choices=opciones_menu).ask()
 
-        if opcion is None or opcion.startswith("7."):
+        if opcion is None or opcion.startswith("8."):
             if guardar_tickets(tickets):
                 console.print("[bold green]Datos guardados correctamente. ¡Hasta luego![/bold green]")
             else:
@@ -200,5 +205,9 @@ def main():
                 ).ask()
                 if prioridad:
                     mostrar_tabla_tickets(filtrar_por_prioridad(tickets, prioridad))
+
+        elif opcion.startswith("7."):
+            mostrar_resumen(tickets, console)
+            
 if __name__ == "__main__":
     main()

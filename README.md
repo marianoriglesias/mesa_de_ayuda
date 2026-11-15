@@ -17,3 +17,5 @@ Sistema de gestión de tickets por consola desarrollado en Python para el área 
 - **Prioridades con código de colores:** Diferenciación visual en la tabla (`alta` en rojo, `media` en amarillo, `baja` en verde).
 - **Ordenamiento por prioridad:** Los listados muestran automáticamente primero los tickets de prioridad `alta`, seguidos por `media` y `baja`.
 - **Filtrado de tickets:** Permite listar tickets filtrando por estado o por prioridad.
+- **Cálculo de tiempo abierto:** Muestra en la tabla cuántas horas o minutos lleva abierto cada ticket pendiente.
+- **Resumen estadístico (`reportes.py`):** Panel con el conteo total de tickets agrupados por estado y prioridad.
