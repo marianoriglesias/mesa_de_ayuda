@@ -12,6 +12,17 @@ from tickets import (
     eliminar_ticket
 )
 
+from tickets import (
+    crear_ticket,
+    buscar_ticket_por_id,
+    cambiar_estado_ticket,
+    eliminar_ticket,
+    ordenar_por_prioridad,
+    filtrar_por_estado,
+    filtrar_por_prioridad
+)
+import tickets
+
 logging.basicConfig(
     filename="helpdesk.log",
     level=logging.INFO,
@@ -51,8 +62,9 @@ def mostrar_tabla_tickets(tickets: list[dict]):
     tabla.add_column("Fecha Creación", justify="center", style="dim")
 
     colores_prioridad = {"alta": "red", "media": "yellow", "baja": "green"}
+    tickets_ordenados = ordenar_por_prioridad(tickets)
 
-    for t in tickets:
+    for t in tickets_ordenados:
         color = colores_prioridad.get(t["prioridad"], "white")
         prioridad_fmt = f"[{color}]{t['prioridad'].upper()}[/{color}]"
         tabla.add_row(
@@ -87,14 +99,15 @@ def main():
         "3. Buscar ticket por ID",
         "4. Cambiar estado",
         "5. Eliminar ticket",
-        "6. Salir"
+        "6. Filtrar tickets",
+        "7. Salir"
     ]
 
     while True:
         console.print()
         opcion = questionary.select("Seleccioná una opción:", choices=opciones_menu).ask()
 
-        if opcion is None or opcion.startswith("6."):
+        if opcion is None or opcion.startswith("7."):
             if guardar_tickets(tickets):
                 console.print("[bold green]Datos guardados correctamente. ¡Hasta luego![/bold green]")
             else:
@@ -166,5 +179,26 @@ def main():
                 else:
                     console.print(f"[yellow]No se encontró ningún ticket con ID #{ticket_id}.[/yellow]")
 
+        elif opcion.startswith("6."):            
+            criterio = questionary.select(
+                "¿Cómo querés filtrar?",
+                choices=["Por estado", "Por prioridad", "Cancelar"]
+            ).ask()
+
+            if criterio == "Por estado":
+                estado = questionary.select(
+                    "Elegí el estado:",
+                    choices=["abierto", "en_curso", "resuelto"]
+                ).ask()
+                if estado:
+                    mostrar_tabla_tickets(filtrar_por_estado(tickets, estado))
+
+            elif criterio == "Por prioridad":
+                prioridad = questionary.select(
+                    "Elegí la prioridad:",
+                    choices=["alta", "media", "baja"]
+                ).ask()
+                if prioridad:
+                    mostrar_tabla_tickets(filtrar_por_prioridad(tickets, prioridad))
 if __name__ == "__main__":
     main()

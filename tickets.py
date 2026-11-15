@@ -55,3 +55,16 @@ def eliminar_ticket(tickets: list[dict], ticket_id: int) -> bool:
         logging.info(f"Ticket #{ticket_id} eliminado")
         return True
     return False
+
+def ordenar_por_prioridad(tickets: list[dict]) -> list[dict]:
+    """Devuelve una copia de los tickets ordenada: alta -> media -> baja."""
+    pesos = {"alta": 1, "media": 2, "baja": 3}
+    return sorted(tickets, key=lambda t: pesos.get(t["prioridad"], 4))
+
+def filtrar_por_estado(tickets: list[dict], estado: str) -> list[dict]:
+    """Filtra los tickets que coincidan con el estado indicado."""
+    return [t for t in tickets if t["estado"] == estado]
+
+def filtrar_por_prioridad(tickets: list[dict], prioridad: str) -> list[dict]:
+    """Filtra los tickets que coincidan con la prioridad indicada."""
+    return [t for t in tickets if t["prioridad"] == prioridad]
