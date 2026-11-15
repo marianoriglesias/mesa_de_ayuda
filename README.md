@@ -19,3 +19,4 @@ Sistema de gestión de tickets por consola desarrollado en Python para el área 
 - **Filtrado de tickets:** Permite listar tickets filtrando por estado o por prioridad.
 - **Cálculo de tiempo abierto:** Muestra en la tabla cuántas horas o minutos lleva abierto cada ticket pendiente.
 - **Resumen estadístico (`reportes.py`):** Panel con el conteo total de tickets agrupados por estado y prioridad.
+- **Exportación a CSV (`reportes.py`):** Genera el archivo `reporte_tickets.csv` formateado para abrir directamente en Excel con todos los tickets y tiempos abiertos.

@@ -1,0 +1,10 @@
+﻿id;titulo;descripcion;prioridad;estado;fecha_creacion;tiempo_abierto
+1;no me esta funcionando el monitor;la pc enciende pero no me da imagen el monitor, creo que es un problema de funcionamiento del monitor...;alta;en_curso;2026-11-15 01:14;19.0 hs
+2;no funciona Outlook;Basicamente eso, quiero abrir el Outlook como lo hago diariamente y no funciona...;media;en_curso;2026-11-15 01:15;19.0 hs
+3;Corte de internet en depósito;Se cayó el enlace principal de fibra óptica en el galpón y no funcionan los lectores de código.;alta;abierto;2026-11-15 01:20;18.9 hs
+4;Cambio de teclado con tecla trabada;El teclado USB de la caja 2 tiene la tecla Enter floja y cuesta marcar los cobros.;baja;resuelto;2026-11-15 01:20;Resuelto
+5;Solicitud de instalación de PDF Reader;Usuario nuevo de compras necesita Acrobat Reader para abrir presupuestos;baja;en_curso;2026-11-15 01:21;18.9 hs
+6;Lentitud en sistema de facturación;El programa de gestión tarda más de 2 minutos en abrir cada consulta de stock.;media;abierto;2026-11-15 01:21;18.9 hs
+7;Outlook no sincroniza correos;"El cliente de correo queda en ""Desconectado"" y no descarga mails desde ayer a la tarde.";media;resuelto;2026-11-15 01:27;Resuelto
+8;Impresora de facturas atascada;La láser HP del mostrador marca error de fusor y no saca los comprobantes;media;abierto;2026-11-15 01:27;18.8 hs
+9;Pantalla azul al iniciar Windows;La PC de recepción tira error BSOD CRITICAL_PROCESS_DIED apenas prende.;alta;resuelto;2026-11-15 01:28;Resuelto

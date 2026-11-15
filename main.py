@@ -3,14 +3,10 @@ import questionary
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
+from reportes import calcular_tiempo_abierto, mostrar_resumen, exportar_a_csv
 
 from archivo import cargar_tickets, guardar_tickets
-from tickets import (
-    crear_ticket,
-    buscar_ticket_por_id,
-    cambiar_estado_ticket,
-    eliminar_ticket
-)
+
 
 from tickets import (
     crear_ticket,
@@ -105,14 +101,15 @@ def main():
         "5. Eliminar ticket",
         "6. Filtrar tickets",
         "7. Ver resumen estadístico",
-        "8. Salir"
+        "8. Exportar reporte a CSV",
+        "9. Salir"
     ]
 
     while True:
         console.print()
         opcion = questionary.select("Seleccioná una opción:", choices=opciones_menu).ask()
 
-        if opcion is None or opcion.startswith("8."):
+        if opcion is None or opcion.startswith("9."):
             if guardar_tickets(tickets):
                 console.print("[bold green]Datos guardados correctamente. ¡Hasta luego![/bold green]")
             else:
@@ -208,6 +205,14 @@ def main():
 
         elif opcion.startswith("7."):
             mostrar_resumen(tickets, console)
-            
+
+        elif opcion.startswith("8."):
+            if not tickets:
+                console.print("[yellow]No hay tickets para exportar.[/yellow]")
+            elif exportar_a_csv(tickets):
+                console.print("[bold green]✔ Reporte exportado con éxito a 'reporte_tickets.csv'.[/bold green]")
+            else:
+                console.print("[bold red]Error al generar el archivo CSV.[/bold red]")
+
 if __name__ == "__main__":
     main()

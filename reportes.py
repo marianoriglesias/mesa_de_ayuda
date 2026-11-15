@@ -1,3 +1,5 @@
+import csv
+import logging
 from datetime import datetime
 from rich.console import Console
 from rich.table import Table
@@ -61,3 +63,31 @@ def mostrar_resumen(tickets: list[dict], console: Console):
     console.print(Panel.fit(f"[bold]Total de tickets registrados:[/bold] {stats['total']}", style="blue"))
     console.print(tabla_estados)
     console.print(tabla_prio)
+
+def exportar_a_csv(tickets: list[dict], nombre_archivo: str = "reporte_tickets.csv") -> bool:
+    """Exporta todos los tickets a un archivo CSV compatible con Excel."""
+    if not tickets:
+        return False
+
+    campos = ["id", "titulo", "descripcion", "prioridad", "estado", "fecha_creacion", "tiempo_abierto"]
+
+    try:
+        with open(nombre_archivo, mode="w", newline="", encoding="utf-8-sig") as f:
+            escritor = csv.DictWriter(f, fieldnames=campos, delimiter=";")
+            escritor.writeheader()
+            for t in tickets:
+                fila = {
+                    "id": t["id"],
+                    "titulo": t["titulo"],
+                    "descripcion": t["descripcion"],
+                    "prioridad": t["prioridad"],
+                    "estado": t["estado"],
+                    "fecha_creacion": t["fecha_creacion"],
+                    "tiempo_abierto": calcular_tiempo_abierto(t)
+                }
+                escritor.writerow(fila)
+        logging.info(f"Reporte exportado correctamente a {nombre_archivo}")
+        return True
+    except IOError as e:
+        logging.error(f"Error al exportar CSV {nombre_archivo}: {e}")
+        return False
