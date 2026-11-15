@@ -1,0 +1,74 @@
+[
+    {
+        "id": 1,
+        "titulo": "no me esta funcionando el monitor",
+        "descripcion": "la pc enciende pero no me da imagen el monitor, creo que es un problema de funcionamiento del monitor...",
+        "prioridad": "alta",
+        "estado": "en_curso",
+        "fecha_creacion": "2026-11-15 01:14"
+    },
+    {
+        "id": 2,
+        "titulo": "no funciona Outlook",
+        "descripcion": "Basicamente eso, quiero abrir el Outlook como lo hago diariamente y no funciona...",
+        "prioridad": "media",
+        "estado": "en_curso",
+        "fecha_creacion": "2026-11-15 01:15"
+    },
+    {
+        "id": 3,
+        "titulo": "Corte de internet en depósito",
+        "descripcion": "Se cayó el enlace principal de fibra óptica en el galpón y no funcionan los lectores de código.",
+        "prioridad": "alta",
+        "estado": "abierto",
+        "fecha_creacion": "2026-11-15 01:20"
+    },
+    {
+        "id": 4,
+        "titulo": "Cambio de teclado con tecla trabada",
+        "descripcion": "El teclado USB de la caja 2 tiene la tecla Enter floja y cuesta marcar los cobros.",
+        "prioridad": "baja",
+        "estado": "resuelto",
+        "fecha_creacion": "2026-11-15 01:20"
+    },
+    {
+        "id": 5,
+        "titulo": "Solicitud de instalación de PDF Reader",
+        "descripcion": "Usuario nuevo de compras necesita Acrobat Reader para abrir presupuestos",
+        "prioridad": "baja",
+        "estado": "en_curso",
+        "fecha_creacion": "2026-11-15 01:21"
+    },
+    {
+        "id": 6,
+        "titulo": "Lentitud en sistema de facturación",
+        "descripcion": "El programa de gestión tarda más de 2 minutos en abrir cada consulta de stock.",
+        "prioridad": "media",
+        "estado": "abierto",
+        "fecha_creacion": "2026-11-15 01:21"
+    },
+    {
+        "id": 7,
+        "titulo": "Outlook no sincroniza correos",
+        "descripcion": "El cliente de correo queda en \"Desconectado\" y no descarga mails desde ayer a la tarde.",
+        "prioridad": "media",
+        "estado": "resuelto",
+        "fecha_creacion": "2026-11-15 01:27"
+    },
+    {
+        "id": 8,
+        "titulo": "Impresora de facturas atascada",
+        "descripcion": "La láser HP del mostrador marca error de fusor y no saca los comprobantes",
+        "prioridad": "media",
+        "estado": "abierto",
+        "fecha_creacion": "2026-11-15 01:27"
+    },
+    {
+        "id": 9,
+        "titulo": "Pantalla azul al iniciar Windows",
+        "descripcion": "La PC de recepción tira error BSOD CRITICAL_PROCESS_DIED apenas prende.",
+        "prioridad": "alta",
+        "estado": "resuelto",
+        "fecha_creacion": "2026-11-15 01:28"
+    }
+]
